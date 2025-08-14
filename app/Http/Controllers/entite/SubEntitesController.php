@@ -76,5 +76,6 @@ class SubEntitesController extends Controller
         return redirect()->route('subentites.index')
                          ->with('success', 'Sous-entité supprimée avec succès.');
     }
+    
     //
 }

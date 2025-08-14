@@ -4,6 +4,7 @@ namespace App\Http\Controllers\entite;
 
 use App\Models\Entite;
 use App\Models\Hotel;
+use App\Models\SubEntite; // Assurez-vous que ce modèle existe
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
@@ -66,9 +67,18 @@ class EntitesController extends Controller
         return redirect()->route('entites.index')->with('success', 'Entité supprimée avec succès.');
     }
 
-    public function show(Entite $entite)
+    public function show($id)
     {
-        $entite->load('subEntites'); // On charge les sous-entités
-        return view('entite.detail', compact('entite'));
+        // On récupère l'entité avec ses sous-entités
+        $entite = Entite::with('subEntites')->findOrFail($id);
+
+        // On récupère la liste de tous les services (ou liés à l'entité si nécessaire)
+        $subEntites = SubEntite::all();
+
+        return view('entite.detail', [
+            'entite' => $entite,
+            'subEntites' => $subEntites
+        ]);
     }
+
 }

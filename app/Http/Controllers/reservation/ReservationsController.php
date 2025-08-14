@@ -103,4 +103,6 @@ class ReservationsController extends Controller
         $reservation->delete();
         return redirect()->route('reservations.index')->with('success', 'Réservation supprimée.');
     }
+
+    
 }
