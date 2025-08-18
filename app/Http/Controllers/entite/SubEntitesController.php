@@ -7,10 +7,11 @@ use Illuminate\Http\Request;
 use App\Models\Entite;
 use App\Models\SubEntite;
 use App\Models\Hotel;
+use Illuminate\Support\Facades\Storage;
 
 class SubEntitesController extends Controller
 {
-     public function index()
+    public function index()
     {
         $subEntites = SubEntite::with('entite')->get();
         $entites = Entite::all();
@@ -32,7 +33,14 @@ class SubEntitesController extends Controller
             'description' => 'nullable|string|max:255',
             'nombre_place' => 'nullable|integer',
             'emplacement' => 'nullable|string|max:255',
+            'entite_id' => 'required|exists:entites,id',
+            'image' => 'nullable|image|max:2048', // validation image
         ]);
+
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('subentites', 'public');
+        }
 
         SubEntite::create([
             'entite_id' => $request->entite_id,
@@ -42,10 +50,10 @@ class SubEntitesController extends Controller
             'nombre_place' => $request->nombre_place,
             'emplacement' => $request->emplacement,
             'prix' => $request->prix,
+            'image' => $imagePath,
         ]);
 
-        return redirect()->route('subentites.index')
-                         ->with('success', 'Sous-entite ajouté avec succès.');
+        return redirect()->route('subentites.index')->with('success', 'Sous-entité ajoutée avec succès.');
     }
 
     public function edit(Entite $entite, SubEntite $subEntite)
@@ -61,9 +69,22 @@ class SubEntitesController extends Controller
             'forfait' => 'nullable|string|max:255',
             'nombre_place' => 'nullable|integer',
             'emplacement' => 'nullable|string|max:255',
+            'entite_id' => 'required|exists:entites,id',
+            'image' => 'nullable|image|max:2048', // validation image
         ]);
 
-        $subEntite->update($request->only('nom', 'prix', 'forfait', 'nombre_place', 'emplacement'));
+        $data = $request->only('nom', 'prix', 'forfait', 'nombre_place', 'emplacement', 'entite_id', 'description');
+
+        // Gestion de l'image
+        if ($request->hasFile('image')) {
+            // Supprimer l'ancienne image si elle existe
+            if ($subEntite->image && Storage::disk('public')->exists($subEntite->image)) {
+                Storage::disk('public')->delete($subEntite->image);
+            }
+            $data['image'] = $request->file('image')->store('subentites', 'public');
+        }
+
+        $subEntite->update($data);
 
         return redirect()->route('subentites.index')
                          ->with('success', 'Sous-entité mise à jour avec succès.');
@@ -71,11 +92,14 @@ class SubEntitesController extends Controller
 
     public function destroy(SubEntite $subEntite)
     {
+        // Supprimer l'image associée si elle existe
+        if ($subEntite->image && Storage::disk('public')->exists($subEntite->image)) {
+            Storage::disk('public')->delete($subEntite->image);
+        }
+
         $subEntite->delete();
 
         return redirect()->route('subentites.index')
                          ->with('success', 'Sous-entité supprimée avec succès.');
     }
-    
-    //
 }

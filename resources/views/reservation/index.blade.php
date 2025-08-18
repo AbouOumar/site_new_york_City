@@ -13,7 +13,7 @@
                 <th class="p-3 text-left">Numero de Reservation</th>
                 <th class="p-3 text-left">Date début</th>
                 <th class="p-3 text-left">Date fin</th>
-                <th class="p-3 text-left">Prix</th>
+                <th class="p-3 text-left" >Prix</th>
                 <th class="p-3 text-left">Statut</th>
                 <th class="p-3 text-right">Actions</th>
             </tr>
@@ -23,7 +23,7 @@
             <tr class="border-t">
                 <td class="p-3">{{ $reservation->nom_client }}</td>
                 <td class="p-3">{{ $reservation->telephone_client }}</td>
-                <td class="p-3">{{ $reservation->service->nom ?? '-' }}</td>
+                <td class="p-3">{{ $reservation->entite->nom ?? '-' }}</td>
                 <td class="p-3">{{ $reservation->numero_reservation }}</td>
                 <td class="p-3">{{ $reservation->date_debut }}</td>
                 <td class="p-3">{{ $reservation->date_fin }}</td>

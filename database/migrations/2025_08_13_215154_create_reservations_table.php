@@ -18,7 +18,7 @@ return new class extends Migration
         $table->string('telephone_client');
         $table->string('email_client')->nullable();
         $table->foreignId('entite_id')->constrained()->onDelete('cascade');
-        $table->foreignId('sub_entite_id')->nullable()->constrained()->onDelete('cascade');
+        $table->foreignId('subEntite_id')->nullable()->constrained()->onDelete('cascade');
         $table->dateTime('date_debut');
         $table->dateTime('date_fin');
         $table->decimal('prix', 10, 2);

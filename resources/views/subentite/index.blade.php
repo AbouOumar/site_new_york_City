@@ -16,6 +16,8 @@
                 <th class="p-3 text-left">Hotels</th>
                 <th class="p-3 text-left">Nom</th>
                 <th class="p-3 text-left">Entité</th>
+                <th class="p-3 text-left">Prix</th>
+                <th class="p-3 text-left">Image</th>
                 <th class="p-3 text-left">Description</th>
                 <th class="p-3 text-left">Forfait</th>
                 <th class="p-3 text-left">Nombre de places</th>
@@ -29,6 +31,14 @@
                     <td class="p-3">{{ $subEntite->entite->hotel->nom ?? '' }}</td>
                     <td class="p-3">{{ $subEntite->nom }}</td>
                     <td class="p-3">{{ $subEntite->entite->nom ?? '' }}</td>
+                    <td class="p-3">{{ $subEntite->prix ? number_format($subEntite->prix, 0, ',', ' ') . ' FCFA' : '-' }}</td>
+                    <td class="p-3">
+                        @if($subEntite->image)
+                            <img src="{{ asset('storage/' . $subEntite->image) }}" class="h-12 w-12 object-cover rounded">
+                        @else
+                            <img src="{{ asset('images/default.png') }}" class="h-12 w-12 object-cover rounded">
+                        @endif
+                    </td>
                     <td class="p-3">{{ $subEntite->description }}</td>
                     <td class="p-3">{{ $subEntite->forfait }}</td>
                     <td class="p-3">{{ $subEntite->nombre_place }}</td>
@@ -41,7 +51,8 @@
                             '{{ $subEntite->entite->id }}',
                             '{{ $subEntite->forfait }}',
                             '{{ $subEntite->nombre_place }}',
-                            '{{ $subEntite->emplacement }}'
+                            '{{ $subEntite->emplacement }}',
+                            '{{ $subEntite->prix }}'
                         )" class="text-yellow-500 hover:underline">Modifier</button>
                         <form action="{{ route('subentites.delete', $subEntite) }}" method="POST" class="inline">
                             @csrf @method('DELETE')
@@ -61,7 +72,7 @@
 <div id="createModal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl">
         <h2 class="text-xl font-bold mb-4">Créer une Sous-Entité</h2>
-        <form action="{{ route('subentites.store') }}" method="POST" class="space-y-4">
+        <form action="{{ route('subentites.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
             @csrf
             
             {{-- Ligne 1 : Hôtel & Entité --}}
@@ -95,22 +106,34 @@
                 </div>
             </div>
 
-            {{-- Ligne 3 : Nombre de places & Emplacement --}}
+            {{-- Ligne 3 : Prix & Nombre de places --}}
             <div class="md:flex md:gap-4">
+                <div class="md:w-1/2">
+                    <label class="block font-medium">Prix (FCFA)</label>
+                    <input type="number" name="prix" class="w-full border rounded p-2">
+                </div>
                 <div class="md:w-1/2">
                     <label class="block font-medium">Nombre de places</label>
                     <input type="number" name="nombre_place" class="w-full border rounded p-2">
                 </div>
-                <div class="md:w-1/2">
-                    <label class="block font-medium">Emplacement</label>
-                    <input type="text" name="emplacement" class="w-full border rounded p-2">
-                </div>
             </div>
 
-            {{-- Ligne 4 : Description (pleine largeur) --}}
+            {{-- Ligne 4 : Emplacement --}}
+            <div>
+                <label class="block font-medium">Emplacement</label>
+                <input type="text" name="emplacement" class="w-full border rounded p-2">
+            </div>
+
+            {{-- Ligne 5 : Description --}}
             <div>
                 <label class="block font-medium">Description</label>
                 <textarea name="description" class="w-full border rounded p-2"></textarea>
+            </div>
+
+            {{-- Ligne 6 : Image --}}
+            <div>
+                <label class="block font-medium">Image</label>
+                <input type="file" name="image" class="w-full border rounded p-2">
             </div>
 
             {{-- Boutons --}}
@@ -126,7 +149,7 @@
 <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl">
         <h2 class="text-xl font-bold mb-4">Modifier la Sous-Entité</h2>
-        <form id="editForm" method="POST" class="space-y-4">
+        <form id="editForm" method="POST" enctype="multipart/form-data" class="space-y-4">
             @csrf
             @method('PUT')
 
@@ -146,28 +169,40 @@
                 </div>
             </div>
 
-            {{-- Ligne 2 : Forfait & Nombre de places --}}
+            {{-- Ligne 2 : Prix & Forfait --}}
             <div class="md:flex md:gap-4">
+                <div class="md:w-1/2">
+                    <label class="block font-medium">Prix (FCFA)</label>
+                    <input type="number" name="prix" id="editPrix" class="w-full border rounded p-2">
+                </div>
                 <div class="md:w-1/2">
                     <label class="block font-medium">Forfait</label>
                     <input type="text" name="forfait" id="editForfait" class="w-full border rounded p-2">
                 </div>
+            </div>
+
+            {{-- Ligne 3 : Nombre de places & Emplacement --}}
+            <div class="md:flex md:gap-4">
                 <div class="md:w-1/2">
                     <label class="block font-medium">Nombre de places</label>
                     <input type="number" name="nombre_place" id="editNombrePlace" class="w-full border rounded p-2">
                 </div>
-            </div>
-
-            {{-- Ligne 3 : Emplacement --}}
-            <div>
-                <label class="block font-medium">Emplacement</label>
-                <input type="text" name="emplacement" id="editEmplacement" class="w-full border rounded p-2">
+                <div class="md:w-1/2">
+                    <label class="block font-medium">Emplacement</label>
+                    <input type="text" name="emplacement" id="editEmplacement" class="w-full border rounded p-2">
+                </div>
             </div>
 
             {{-- Ligne 4 : Description --}}
             <div>
                 <label class="block font-medium">Description</label>
                 <textarea name="description" id="editDescription" class="w-full border rounded p-2"></textarea>
+            </div>
+
+            {{-- Ligne 5 : Image --}}
+            <div>
+                <label class="block font-medium">Image (laisser vide pour ne pas changer)</label>
+                <input type="file" name="image" class="w-full border rounded p-2">
             </div>
 
             {{-- Boutons --}}
@@ -187,13 +222,14 @@ function openModal(id) {
 function closeModal(id) {
     document.getElementById(id).classList.add('hidden');
 }
-function openEditModal(id, name, description, entiteId, forfait, nombrePlace, emplacement) {
+function openEditModal(id, name, description, entiteId, forfait, nombrePlace, emplacement, prix) {
     document.getElementById('editName').value = name;
     document.getElementById('editDescription').value = description;
     document.getElementById('editEntite').value = entiteId;
     document.getElementById('editForfait').value = forfait;
     document.getElementById('editNombrePlace').value = nombrePlace;
     document.getElementById('editEmplacement').value = emplacement;
+    document.getElementById('editPrix').value = prix;
     document.getElementById('editForm').action = `/subentites/${id}`;
     openModal('editModal');
 }
@@ -201,7 +237,6 @@ document.getElementById('hotelSelect').addEventListener('change', function() {
     const hotelId = this.value;
     const entiteSelect = document.getElementById('entiteSelect');
     
-    // Réinitialiser
     entiteSelect.innerHTML = '<option value="">-- Sélectionner une entité --</option>';
     entiteSelect.disabled = true;
 

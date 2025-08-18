@@ -32,8 +32,8 @@ class ReservationsController extends Controller
             'nom_client' => 'required|string|max:255',
             'telephone_client' => 'required|string|max:20',
             'email_client' => 'nullable|email',
-            'service_id' => 'required|exists:services,id',
-            'sub_service_id' => 'nullable|exists:sub_services,id',
+            'entite_id' => 'required|exists:entites,id',
+            'subEntite_id' => 'nullable|exists:subEntites,id',
             'date_debut' => 'required|date',
             'date_fin' => 'required|date|after_or_equal:date_debut',
             'prix' => 'required|numeric',
@@ -41,12 +41,12 @@ class ReservationsController extends Controller
 
         // Récupération des 2 lettres
         $prefix = '';
-        if ($request->sub_service_id) {
-            $sub = SubService::find($request->sub_service_id);
+        if ($request->subEntite_id) {
+            $sub = SubEntite::find($request->subEntite_id);
             $prefix = strtoupper(Str::limit($sub->nom, 2, ''));
         } else {
-            $service = Service::find($request->service_id);
-            $prefix = strtoupper(Str::limit($service->nom, 2, ''));
+            $entite = Entite::find($request->entite_id);
+            $prefix = strtoupper(Str::limit($entite->nom, 2, ''));
         }
 
         // Génération du numéro : date + heure + préfixe
@@ -83,8 +83,8 @@ class ReservationsController extends Controller
             'nom_client' => 'required|string|max:255',
             'telephone_client' => 'required|string|max:20',
             'email_client' => 'nullable|email',
-            'service_id' => 'required|exists:services,id',
-            'sub_service_id' => 'nullable|exists:sub_services,id',
+            'entite_id' => 'required|exists:entites,id',
+            'subEntite_id' => 'nullable|exists:subEntites,id',
             'date_debut' => 'required|date',
             'date_fin' => 'required|date|after_or_equal:date_debut',
             'prix' => 'required|numeric',
@@ -103,6 +103,8 @@ class ReservationsController extends Controller
         $reservation->delete();
         return redirect()->route('reservations.index')->with('success', 'Réservation supprimée.');
     }
+
+   
 
     
 }

@@ -7,6 +7,7 @@ use App\Models\Hotel;
 use App\Models\SubEntite; // Assurez-vous que ce modèle existe
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class EntitesController extends Controller
 {
@@ -18,10 +19,10 @@ class EntitesController extends Controller
     }
 
     public function getEntitesByHotel($hotelId)
-{
-    $entites = Entite::where('hotel_id', $hotelId)->get(['id', 'nom']);
-    return response()->json($entites);
-}
+    {
+        $entites = Entite::where('hotel_id', $hotelId)->get(['id', 'nom']);
+        return response()->json($entites);
+    }
 
     public function store(Request $request)
     {
@@ -30,14 +31,16 @@ class EntitesController extends Controller
             'description' => 'nullable|string',
             'hotel_id' => 'required|exists:hotels,id',
             'type' => 'required|in:Restaurant,Boites,Plein air,Piscine,Chambres',
+            'image' => 'nullable|image|max:2048', // ajout validation image
         ]);
 
-        Entite::create([
-            'nom' => $request->nom,
-            'description' => $request->description,
-            'hotel_id' => $request->hotel_id,
-            'type' => $request->type,
-        ]);
+        $data = $request->only(['nom', 'description', 'hotel_id', 'type']);
+
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('entites', 'public');
+        }
+
+        Entite::create($data);
 
         return redirect()->route('entites.index')->with('success', 'Entité ajoutée avec succès.');
     }
@@ -49,20 +52,32 @@ class EntitesController extends Controller
             'description' => 'nullable|string',
             'hotel_id' => 'required|exists:hotels,id',
             'type' => 'required|in:Restaurant,Boites,Plein air,Piscine,Chambres',
+            'image' => 'nullable|image|max:2048', // validation image
         ]);
 
-        $entite->update([
-            'nom' => $request->nom,
-            'description' => $request->description,
-            'hotel_id' => $request->hotel_id,
-            'type' => $request->type,
-        ]);
+        $data = $request->only(['nom', 'description', 'hotel_id', 'type']);
+
+        if ($request->hasFile('image')) {
+            // supprimer l'ancienne image si elle existe
+            if ($entite->image && Storage::disk('public')->exists($entite->image)) {
+                Storage::disk('public')->delete($entite->image);
+            }
+
+            $data['image'] = $request->file('image')->store('entites', 'public');
+        }
+
+        $entite->update($data);
 
         return redirect()->route('entites.index')->with('success', 'Entité modifiée avec succès.');
     }
 
     public function destroy(Entite $entite)
     {
+        // supprimer l'image si elle existe
+        if ($entite->image && Storage::disk('public')->exists($entite->image)) {
+            Storage::disk('public')->delete($entite->image);
+        }
+
         $entite->delete();
         return redirect()->route('entites.index')->with('success', 'Entité supprimée avec succès.');
     }
@@ -80,5 +95,4 @@ class EntitesController extends Controller
             'subEntites' => $subEntites
         ]);
     }
-
 }

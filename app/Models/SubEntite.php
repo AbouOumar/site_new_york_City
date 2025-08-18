@@ -10,6 +10,7 @@ class SubEntite extends Model
         'entite_id',
          'nom', 
          'prix',
+        'image',
          'forfait',
          'description',
          'nombre_place',

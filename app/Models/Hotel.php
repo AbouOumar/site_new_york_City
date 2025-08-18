@@ -10,6 +10,7 @@ class Hotel extends Model
         'nom',
         'description',
         'location',
+        'image',
         
     ];
      public function entites()

@@ -11,6 +11,7 @@ class Entite extends Model
     protected $fillable = [
         'nom',
         'description',
+        'image',
         'hotel_id',
         'type',
     ];

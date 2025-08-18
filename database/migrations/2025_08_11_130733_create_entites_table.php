@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('entites', function (Blueprint $table) {
             $table->id();
             $table->string('nom')->unique(); // Nom de l'entité
+            $table->string('image')->nullable(); // l'image de l'entité
             $table->string('description')->nullable(); // Description de l'entité
             $table->foreignId('hotel_id')->constrained('hotels'); // Hôtel responsable de l'entité
             $table->enum('type', ['Restaurant', 'Boites', 'Plein air','Piscine','Chambres']); // Type de l'entité

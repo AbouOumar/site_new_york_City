@@ -6,6 +6,7 @@
     <title>{{ $entite->nom }}</title>
     @vite('resources/css/app.css')
 </head>
+
 <body class="bg-gray-50 text-gray-800">
 
     <!-- Navbar -->
@@ -26,49 +27,46 @@
             <p class="text-gray-600">{{ $entite->description }}</p>
         </div>
 
-        <!-- Formulaire de réservation -->
-        <div class="bg-white shadow-md rounded-lg p-6 mb-10">
-            <h2 class="text-xl font-bold mb-4">Réserver une sous-entité</h2>
-            <form action="{{ route('reservations.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                @csrf
-                <input type="text" name="nom_client" placeholder="Nom du client" class="border rounded p-2" required>
-                <input type="text" name="telephone_client" placeholder="Téléphone" class="border rounded p-2" required>
-                <input type="email" name="email_client" placeholder="Email" class="border rounded p-2" required>
-                <input type="text" name="numero_reservation" placeholder="Numéro de réservation" class="border rounded p-2" required>
+       <!-- Formulaire de réservation -->
+<div class="bg-white shadow-md rounded-lg p-6 mb-10">
+    <h2 class="text-xl font-bold mb-4">Réserver une sous-entité</h2>
+    <form action="{{ route('reservations.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        @csrf
+        <input type="text" name="nom_client" placeholder="Nom du client" class="border rounded p-2" required>
+        <input type="text" name="telephone_client" placeholder="Téléphone" class="border rounded p-2" required>
+        <input type="email" name="email_client" placeholder="Email" class="border rounded p-2" required>
 
-                <!-- Sélection du service -->
-                <select name="service_id" class="border rounded p-2" required>
-                    <option value="">Sélectionner un service</option>
-                    @foreach($subEntites as $subEntite)
-                        <option value="{{ $subEntite->id }}">{{ $subEntite->nom }}</option>
-                    @endforeach
-                </select>
+        <!-- Service (fixé automatiquement) -->
+        <input type="hidden" name="service_id" value="{{ $entite->id }}">
 
-                <!-- Sélection de la sous-entité -->
-                <select name="sub_service_id" class="border rounded p-2" required>
-                    <option value="">Sélectionner une sous-entité</option>
-                    @foreach($subEntites as $subEntite)
-                        <option value="{{ $subEntite->id }}">{{ $subEntite->nom }}</option>
-                    @endforeach
-                </select>
+        <!-- Choix de la sous-entité -->
+        <select name="sub_entite_id" class="border rounded p-2" required>
+            <option value="">Sélectionner une sous-entité</option>
+            @forelse($entite->subEntites as $subEntite)
+                <option value="{{ $subEntite->id }}">
+                    {{ $subEntite->nom }} - {{ number_format($subEntite->prix, 0, ',', ' ') }} GNF
+                </option>
+            @empty
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-gray-500">Aucune sous-entité disponible</td>
+                        </tr>
+            @endforelse
+        </select>
 
-                <input type="date" name="date_debut" class="border rounded p-2" required>
-                <input type="date" name="date_fin" class="border rounded p-2" required>
-                <input type="number" step="0.01" name="prix" placeholder="Prix" class="border rounded p-2" required>
+        <input type="date" name="date_debut" class="border rounded p-2" required>
+        <input type="date" name="date_fin" class="border rounded p-2" required>
 
-                <select name="statut" class="border rounded p-2" required>
-                    <option value="en_attente">En attente</option>
-                    <option value="confirmee">Confirmée</option>
-                    <option value="annulee">Annulée</option>
-                </select>
+        <!-- Le statut sera défini automatiquement côté back-end à "en_attente" -->
+        <!-- Le prix est affiché directement avec la sous-entité -->
 
-                <div class="md:col-span-3">
-                    <button type="submit" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">
-                        Réserver
-                    </button>
-                </div>
-            </form>
+        <div class="md:col-span-3">
+            <button type="submit" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">
+                Réserver
+            </button>
         </div>
+    </form>
+</div>
+
 
         <!-- Liste des sous-entités -->
         <div class="bg-white shadow rounded-lg overflow-hidden">

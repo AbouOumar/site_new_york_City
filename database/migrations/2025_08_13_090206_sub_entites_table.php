@@ -16,6 +16,7 @@ return new class extends Migration
     $table->id();
     $table->foreignId('entite_id')->constrained('entites')->onDelete('cascade');
     $table->string('nom'); // Nom du sous-service
+    $table->string('image')->nullable(); // l'image de la sous-entité
     $table->decimal('prix', 10, 2)->nullable();
     $table->string('forfait')->nullable();
     $table->integer('nombre_place')->nullable();

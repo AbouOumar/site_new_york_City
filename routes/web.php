@@ -76,12 +76,13 @@ Route::delete('/subentites/{id}', [EntitesController::class, 'deleteSubEntite'])
         ->name('reservations.updateStatus');
 
 
-Route::get('/test', function() {
-    return view('test');
-});
 
-Route::get('/home', function () {
-    return view('welcome');
-})->name('home');
+
+Route::get('/home',[HotelsController::class, 'accueil'])->name('accueil');
 
 Route::get('/hotels/vitrine', [HotelsController::class, 'listeVitrine'])->name('hotels.vitrine');
+
+Route::get('/vente-direct', function () {
+    $subentites = SubEntite::all();
+    return view('venteDirect.index', compact('subentites'));
+});

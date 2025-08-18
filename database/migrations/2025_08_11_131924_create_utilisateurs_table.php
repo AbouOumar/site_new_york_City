@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nom')->unique(); // Nom de l'utilisateur
             $table->string('email')->unique(); // Email de l'utilisateur
+            $table->string('image')->nullable(); // l'image de l'utilisateur
             $table->foreignId('hotel_id')->nullable()->constrained('hotels'); // Hôtel de l'utilisateur
             $table->foreignId('role_id')->constrained('roles'); // Rôle de l'utilisateur
             $table->string('password'); // Mot de passe de l'utilisateur
