@@ -1,12 +1,24 @@
 @extends('layouts.app')
 
 @section('content')
+<!-- Inclure Alpine.js si ce n'est pas déjà fait dans layouts.app -->
+<script src="//unpkg.com/alpinejs" defer></script>
+
 <div x-data="venteDirecte()" class="p-6 bg-blue-50 rounded-lg shadow">
     <h1 class="text-2xl font-bold mb-4">Vente directe</h1>
 
+    <!-- Sélection entité -->
+    <label class="block mb-2 font-semibold">Entité / Sous-entité :</label>
+    <select x-model="subEntiteId" name="sub_entite_id" class="border rounded p-2 w-1/3 mb-4">
+        <option value="">-- Sélectionnez une entité --</option>
+        @foreach($subEntites as $subentite)
+            <option value="{{ $subentite->id }}">{{ $subentite->nom }}</option>
+        @endforeach
+    </select>
+
     <!-- Bouton valider -->
     <button @click="validerVente()" class="mb-4 bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
-        📦 Validez la vente
+        📦 Valider la vente
     </button>
 
     <!-- Tableau -->
@@ -22,22 +34,33 @@
             </tr>
         </thead>
         <tbody>
-            <template x-for="(ligne, index) in lignes" :key="index">
+            <template x-for="(detail, index) in details" :key="index">
                 <tr class="border-t">
                     <td class="p-2">
-                        <input type="text" x-model="ligne.produit" placeholder="Nom du produit" class="border rounded p-1 w-full">
+                        <select x-model="detail.produit_id" @change="majPrix(index)" class="border rounded p-1 w-full">
+                            <option value="">-- Produit --</option>
+                            @foreach($categories as $categorie)
+                                <optgroup label="{{ $categorie->nom }}">
+                                    @foreach($categorie->produits as $produit)
+                                        <option value="{{ $produit->id }}" data-prix="{{ $produit->prix }}">
+                                            {{ $produit->nom }}
+                                        </option>
+                                    @endforeach
+                                </optgroup>
+                            @endforeach
+                        </select>
                     </td>
                     <td class="p-2">
-                        <input type="number" x-model="ligne.quantite" @input="calculer(index)" min="1" class="border rounded p-1 w-20">
+                        <input type="number" x-model="detail.quantite" @input="calculer(index)" min="1" class="border rounded p-1 w-20">
                     </td>
                     <td class="p-2">
-                        <input type="number" x-model="ligne.prix" @input="calculer(index)" min="0" class="border rounded p-1 w-24">
+                        <input type="number" x-model="detail.prix" @input="calculer(index)" min="0" class="border rounded p-1 w-24">
                     </td>
                     <td class="p-2">
-                        <input type="number" x-model="ligne.remise" @input="calculer(index)" min="0" class="border rounded p-1 w-20">
+                        <input type="number" x-model="detail.remise" @input="calculer(index)" min="0" class="border rounded p-1 w-20">
                     </td>
                     <td class="p-2">
-                        <input type="text" x-model="ligne.net" readonly class="border rounded p-1 w-24 bg-gray-100">
+                        <input type="text" x-model="detail.net" readonly class="border rounded p-1 w-24 bg-gray-100">
                     </td>
                     <td class="p-2 text-center">
                         <button @click="supprimer(index)" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">🗑</button>
@@ -49,23 +72,18 @@
 
     <!-- Résumé -->
     <div class="mt-4 space-y-2">
-        <label>Subentites :</label>
-        <select class="border rounded p-2 w-1/3">
-            <option value="">Sélectionnez un subentite</option>
-            @foreach($subentites as $subentite)
-                <option value="{{ $subentite->id }}">{{ $subentite->nom }}</option>
-            @endforeach
-        </select>
-
         <div>Total quantité : <span x-text="totalQuantite"></span></div>
         <div>Total : <span x-text="total"></span> GNF</div>
-        <div>Remise globale : <input type="number" x-model="remiseGlobale" @input="calculerTotal()" class="border rounded p-1 w-20"></div>
+        <div>
+            Remise globale : 
+            <input type="number" x-model="remiseGlobale" @input="calculerTotal()" class="border rounded p-1 w-20">
+        </div>
         <div class="font-bold text-lg">Net à payer : <span x-text="netAPayer"></span> GNF</div>
 
         <div>
             Situation :
-            <label><input type="radio" name="situation" value="soldé"> Soldé</label>
-            <label class="ml-4"><input type="radio" name="situation" value="crédit"> Crédit</label>
+            <label><input type="radio" name="situation" value="soldé" x-model="situation"> Soldé</label>
+            <label class="ml-4"><input type="radio" name="situation" value="crédit" x-model="situation"> Crédit</label>
         </div>
     </div>
 
@@ -76,34 +94,61 @@
 <script>
 function venteDirecte() {
     return {
-        lignes: [
-            { produit: '', quantite: 1, prix: 0, remise: 0, net: 0 }
+        subEntiteId: "",
+        details: [
+            { produit_id: '', quantite: 1, prix: 0, remise: 0, net: 0 }
         ],
         totalQuantite: 0,
         total: 0,
         remiseGlobale: 0,
         netAPayer: 0,
+        situation: "soldé",
 
+        majPrix(index) {
+            let select = document.querySelectorAll("select[x-model='detail.produit_id']")[index];
+            let prix = select.options[select.selectedIndex]?.dataset.prix;
+            this.details[index].prix = prix ? Number(prix) : 0;
+            this.calculer(index);
+        },
         calculer(index) {
-            let l = this.lignes[index];
+            let l = this.details[index];
             l.net = (l.quantite * l.prix) - l.remise;
             this.calculerTotal();
         },
         calculerTotal() {
-            this.totalQuantite = this.lignes.reduce((s, l) => s + Number(l.quantite), 0);
-            this.total = this.lignes.reduce((s, l) => s + Number(l.net), 0);
+            this.totalQuantite = this.details.reduce((s, l) => s + Number(l.quantite), 0);
+            this.total = this.details.reduce((s, l) => s + Number(l.net), 0);
             this.netAPayer = this.total - this.remiseGlobale;
         },
         ajouter() {
-            this.lignes.push({ produit: '', quantite: 1, prix: 0, remise: 0, net: 0 });
+            this.details.push({ produit_id: '', quantite: 1, prix: 0, remise: 0, net: 0 });
         },
         supprimer(index) {
-            this.lignes.splice(index, 1);
+            this.details.splice(index, 1);
             this.calculerTotal();
         },
         validerVente() {
-            alert("Vente validée !");
-            // ici tu feras un post vers ton contrôleur Laravel
+            if (!this.subEntiteId) {
+                alert("⚠️ Veuillez choisir une entité !");
+                return;
+            }
+
+            fetch("{{ route('ventes.store') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({
+                    sub_entite_id: this.subEntiteId,
+                    details: this.details,
+                    remiseGlobale: this.remiseGlobale,
+                    netAPayer: this.netAPayer,
+                    situation: this.situation
+                })
+            }).then(res => res.json())
+              .then(data => alert("✅ Vente enregistrée avec succès !"))
+              .catch(err => console.error(err));
         }
     }
 }

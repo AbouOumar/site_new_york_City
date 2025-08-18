@@ -7,6 +7,8 @@ use App\Http\Controllers\utilisateur\UtilisateursController;
 use App\Http\Controllers\entite\EntitesController;
 use App\Http\Controllers\entite\SubEntitesController;
 use App\Http\Controllers\reservation\ReservationsController;
+use App\Http\Controllers\vente\VentesController;
+use App\Models\SubEntite;
 
 Route::get('/', [HotelsController::class, 'accueil'])->name('home');
 //Les Routes pour les hotels
@@ -82,7 +84,7 @@ Route::get('/home',[HotelsController::class, 'accueil'])->name('accueil');
 
 Route::get('/hotels/vitrine', [HotelsController::class, 'listeVitrine'])->name('hotels.vitrine');
 
-Route::get('/vente-direct', function () {
-    $subentites = SubEntite::all();
-    return view('venteDirect.index', compact('subentites'));
-});
+Route::get('/vente-direct', [\App\Http\Controllers\vente\ventesController::class, 'index']);
+
+
+Route::resource('ventes', VentesController::class);

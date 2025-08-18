@@ -11,15 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ventes', function (Blueprint $table) {
+        Schema::create('detail_ventes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('subEntite_id')->constrained()->onDelete('cascade');
+            $table->foreignId('vente_id')->constrained()->onDelete('cascade');
+            $table->foreignId('produit_id')->constrained()->onDelete('cascade');
             $table->integer('quantite');
-            $table->decimal('total', 10, 2);
-            $table->decimal('remise_globale', 10, 2);
-            $table->decimal('net', 10, 2);
-            $table->enum('status', ['soldé', 'credit'])->default('soldé'); // 
-
+            $table->decimal('prix', 12, 2);
+            $table->decimal('remise', 12, 2)->default(0);
+            $table->decimal('net', 12, 2);
             $table->timestamps();
         });
     }
@@ -29,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('ventes');
+        Schema::dropIfExists('detail_ventes');
     }
 };
