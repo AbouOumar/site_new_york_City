@@ -6,7 +6,7 @@
     <title>Bienvenue</title>
     @vite('resources/css/app.css')
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body class="bg-gray-100 text-gray-800">
 
     <!-- Navbar -->
     <nav class="bg-gray-300 shadow-md fixed w-full top-0 z-50">
@@ -34,10 +34,10 @@
     </template>
 
     <!-- Overlay sombre -->
-    <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+    <div class="absolute inset-0 bg-gray-600 bg-opacity-50"></div>
 
     <!-- Texte Bienvenue -->
-    <div class="relative z-10 text-center text-white">
+    <div class="relative z-10 text-center text-white bg-gray-600 p-4">
         <h1 class="text-4xl font-bold">Bienvenue</h1>
         <p class="text-lg mt-2">Découvrez nos hôtels et réservez facilement en ligne.</p>
     </div>
@@ -48,7 +48,7 @@
 
   
     <!-- Liste des Hôtels -->
-    <div class="max-w-7xl mx-auto py-12 px-4 grid grid-cols-1 md:grid-cols-3 gap-8" id="hotel-list">
+    <div class="max-w-7xl mx-auto py-12 px-4 grid grid-cols-1 md:grid-cols-3 gap-8 " id="hotel-list">
         @foreach($hotels as $hotel)
             
             <div class="bg-white shadow rounded-lg overflow-hidden transform hover:-translate-y-2 hover:shadow-lg transition-all duration-500">
