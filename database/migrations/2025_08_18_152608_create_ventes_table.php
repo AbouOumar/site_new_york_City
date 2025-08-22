@@ -13,15 +13,18 @@ return new class extends Migration
     {
         Schema::create('ventes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('subEntite_id')->constrained()->onDelete('cascade');
+            $table->foreignId('subEntite_id')->nullable()->constrained()->onDelete('cascade'); 
             $table->integer('quantite');
             $table->decimal('total', 10, 2);
-            $table->decimal('remise_globale', 10, 2);
+            $table->decimal('remise_globale', 10, 2)->default(0);
             $table->decimal('net', 10, 2);
-            $table->enum('status', ['soldé', 'credit'])->default('soldé'); // 
+    
+            // Statut de paiement / commande
+            $table->enum('etat_commande', ['en_attente', 'validee', 'annulee'])->default('en_attente'); 
+            $table->enum('status', ['soldé', 'credit'])->default('soldé'); 
 
             $table->timestamps();
-        });
+});
     }
 
     /**

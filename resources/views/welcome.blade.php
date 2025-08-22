@@ -9,7 +9,7 @@
 <body class="bg-gray-50 text-gray-800">
 
     <!-- Navbar -->
-    <nav class="bg-white shadow-md fixed w-full top-0 z-50">
+    <nav class="bg-gray-300 shadow-md fixed w-full top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 flex justify-between items-center h-16">
             <a href="{{ route('accueil') }}" class="text-2xl font-bold text-blue-600">New York City</a>
             <ul class="flex space-x-6">
@@ -20,15 +20,33 @@
     </nav>
 
     <!-- Hero -->
-    <section class="h-[50vh] flex items-center justify-center bg-cover bg-center relative group" 
-             style="background-image: url('https://cdn.britannica.com/96/115096-050-5AFDAF5D/Bellagio-Hotel-Casino-Las-Vegas.jpg');">
-        <div class="absolute inset-0 bg-black bg-opacity-50 group-hover:bg-opacity-60 transition duration-500"></div>
-        <div class="relative p-8 rounded-lg text-center text-white transform group-hover:scale-105 transition duration-500">
-            <h1 class="text-4xl font-bold mb-4">Bienvenue chez New York City</h1>
-            <p class="text-lg">Découvrez nos hôtels et réservez facilement en ligne.</p>
+<section x-data="{ index: 0, hotels: @json($hotels) }"
+         x-init="setInterval(() => { index = (index + 1) % hotels.length }, 3000)"
+         class="relative h-[50vh] w-full flex items-center justify-center overflow-hidden bg-gray-200">
+
+    <!-- Images qui défilent -->
+    <template x-for="(hotel, i) in hotels" :key="i">
+        <div class="absolute inset-0 transition-opacity duration-1000"
+             :class="{ 'opacity-0': i !== index, 'opacity-100': i === index }">
+            <img :src="hotel.image ? '/storage/' + hotel.image : '/storage/hotels/default-hotel.jpg'" 
+                 class="w-full h-full object-cover" alt="" />
         </div>
-    </section>
-    
+    </template>
+
+    <!-- Overlay sombre -->
+    <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+
+    <!-- Texte Bienvenue -->
+    <div class="relative z-10 text-center text-white">
+        <h1 class="text-4xl font-bold">Bienvenue</h1>
+        <p class="text-lg mt-2">Découvrez nos hôtels et réservez facilement en ligne.</p>
+    </div>
+</section>
+
+<!-- N’oublie pas d’inclure Alpine.js -->
+<script src="//unpkg.com/alpinejs" defer></script>
+
+  
     <!-- Liste des Hôtels -->
     <div class="max-w-7xl mx-auto py-12 px-4 grid grid-cols-1 md:grid-cols-3 gap-8" id="hotel-list">
         @foreach($hotels as $hotel)
@@ -61,6 +79,8 @@
             </div>
         @endforeach
     </div>
-
+    <footer class="bg-gray-300 border-t py-4 text-center text-sm text-blue-500">
+        &copy; {{ date('Y') }} New-York-City-Hôtels. Tous droits réservés.
+    </footer>
 </body>
 </html>

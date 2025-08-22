@@ -34,14 +34,20 @@ class EntitesController extends Controller
             'image' => 'nullable|image|max:2048', // ajout validation image
         ]);
 
-        $data = $request->only(['nom', 'description', 'hotel_id', 'type']);
-
+        $imagePath = null;
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('entites', 'public');
+            $imagePath = $request->file('image')->store('entites', 'public');
         }
 
-        Entite::create($data);
-
+        Entite::create([
+            'hotel_id' => $request->hotel_id,
+            'nom' => $request->nom,
+            'description' => $request->description,
+            'type' => $request->type,
+            'image' => $imagePath,
+        ]);
+ 
+        
         return redirect()->route('entites.index')->with('success', 'Entité ajoutée avec succès.');
     }
 

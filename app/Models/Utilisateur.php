@@ -12,8 +12,10 @@ class Utilisateur extends Model
         'password',
         'role_id',
         'hotel_id',
+        'sub_entite_id'
 
     ];
+    protected $hidden = ['password'];
     public function role()
 {
     return $this->belongsTo(Role::class);
@@ -22,6 +24,11 @@ class Utilisateur extends Model
 public function hotel()
 {
     return $this->belongsTo(Hotel::class);
+}
+
+public function subEntite()
+{
+    return $this->belongsTo(SubEntite::class);
 }
 
     //

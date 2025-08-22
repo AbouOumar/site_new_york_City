@@ -19,13 +19,13 @@ class Reservation extends Model
         'telephone_client',
         'email_client',
         'numero_reservation',
-        'service_id',
-        'sub_service_id',
+        'entite_id',
+        'sub_entite_id',
         'date_debut',
         'date_fin',
         'prix',
         'statut',
-    ];
+    ]; 
 
     public function entite()
     {
@@ -34,6 +34,6 @@ class Reservation extends Model
 
     public function subEntite()
     {
-        return $this->belongsTo(SubEntite::class);
+        return $this->belongsTo(SubEntite::class, 'sub_entite_id');
     }
 }

@@ -28,6 +28,16 @@
         <p class="text-3xl font-extrabold text-green-900">{{ $utilisateursCount }}</p>
       </div>
     </div>
+    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl shadow-md p-6 flex items-center space-x-4 hover:shadow-lg transition">
+      <div class="bg-green-200 text-green-700 p-3 rounded-full">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a8.38 8.38 0 0113 0"/></svg>
+      </div>
+      <div>
+        <p class="text-sm font-medium text-yellow-800">Entites</p>
+        <p class="text-3xl font-extrabold text-green-900">{{ $entitesCount }}</p>
+      </div>
+    </div>
+    
 
     <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl shadow-md p-6 hover:shadow-lg transition">
       <p class="text-sm font-medium text-purple-800 mb-3">Hôtels par ville</p>
@@ -40,6 +50,17 @@
         @endforeach
       </ul>
     </div>
+    <div class="bg-gradient-to-br from-pink-100 to-purple-100 rounded-xl shadow-md p-6 hover:shadow-lg transition">
+      <p class="text-sm font-medium text-purple-800 mb-3">Entités par hôtel</p>
+      <ul class="text-gray-700 space-y-1">
+        @foreach($entitesParHotel as $data)
+    <li class="flex justify-between">
+        <span>{{ $data['hotel_nom'] }}</span>
+        <span class="font-semibold">{{ $data['count'] }}</span>
+    </li>
+@endforeach
+      </ul>
+    </div>
   </div>
 
   <!-- Derniers utilisateurs -->
@@ -47,7 +68,7 @@
     <h2 class="text-xl font-semibold mb-4">Derniers utilisateurs</h2>
     <div class="overflow-x-auto bg-white rounded-xl shadow-md border border-gray-200">
       <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+        <thead class="bg-blue-200">
           <tr>
             <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Nom</th>
             <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Email</th>
@@ -81,7 +102,7 @@
     <h2 class="text-xl font-semibold mb-4 mt-8">Derniers hôtels</h2>
     <div class="overflow-x-auto bg-white rounded-xl shadow-md border border-gray-200">
       <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+        <thead class="bg-gray-150">
           <tr>
             <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Nom</th>
             <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Localité</th>

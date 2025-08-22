@@ -23,6 +23,13 @@
 
         <!-- Infos Entité -->
         <div class="bg-white shadow rounded-lg p-6 mb-8">
+            <div class="overflow-hidden h-48">
+                        @if($entite->image)
+                            <img src="{{ asset('storage/' . $entite->image) }}" alt="{{ $entite->nom }}" class="w-full h-full object-cover">
+                        @else
+                            <img src="{{ asset('storage/entites/default-entite.jpg') }}" alt="{{ $entite->nom }}" class="w-full h-full object-cover">
+                        @endif
+                    </div>
             <h1 class="text-3xl font-bold mb-2">{{ $entite->nom }}</h1>
             <p class="text-gray-600">{{ $entite->description }}</p>
         </div>
@@ -37,7 +44,7 @@
         <input type="email" name="email_client" placeholder="Email" class="border rounded p-2" required>
 
         <!-- Service (fixé automatiquement) -->
-        <input type="hidden" name="service_id" value="{{ $entite->id }}">
+        <input type="hidden" name="entite_id" value="{{ $entite->id }}"> 
 
         <!-- Choix de la sous-entité -->
         <select name="sub_entite_id" class="border rounded p-2" required>
@@ -53,8 +60,8 @@
             @endforelse
         </select>
 
-        <input type="date" name="date_debut" class="border rounded p-2" required>
-        <input type="date" name="date_fin" class="border rounded p-2" required>
+        <input type="datetime-local" name="date_debut" class="border rounded p-2" required>
+        <input type="datetime-local" name="date_fin" class="border rounded p-2" required>
 
         <!-- Le statut sera défini automatiquement côté back-end à "en_attente" -->
         <!-- Le prix est affiché directement avec la sous-entité -->
@@ -65,6 +72,16 @@
             </button>
         </div>
     </form>
+
+    @if ($errors->any())
+    <div class="mb-4 text-red-600">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 </div>
 
 
@@ -75,6 +92,7 @@
                     <tr>
                         <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Nom</th>
                         <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Prix</th>
+                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Image</th>
                         <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Forfait</th>
                         <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Description</th>
                         <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Places</th>
@@ -85,11 +103,20 @@
                     @forelse($entite->subEntites as $sub)
                         <tr>
                             <td class="px-4 py-2 font-medium text-gray-800">{{ $sub->nom }}</td>
-                            <td class="px-4 py-2 text-gray-600">{{ $sub->prix }} €</td>
+                            <td class="px-4 py-2 text-gray-600">{{ $sub->prix }} FG</td>
+                            <td class="px-4 py-2 text-gray-600">
+                                @if($sub->image)
+                                    <img src="{{ asset('storage/' . $sub->image) }}" class="h-12 w-12 object-cover rounded">
+                                @else
+                                    <img src="{{ asset('images/default.png') }}" class="h-12 w-12 object-cover rounded">
+                                @endif
+                            </td>
                             <td class="px-4 py-2 text-gray-600">{{ $sub->forfait ?? 'N/A' }}</td>
                             <td class="px-4 py-2 text-gray-600">{{ Str::limit($sub->description, 50) }}</td>
                             <td class="px-4 py-2 text-gray-600">{{ $sub->nombre_place }}</td>
                             <td class="px-4 py-2 text-gray-600">{{ $sub->emplacement }}</td>
+
+
                         </tr>
                     @empty
                         <tr>

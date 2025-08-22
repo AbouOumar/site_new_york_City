@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('entites', function (Blueprint $table) {
-            $table->id();
-            $table->string('nom')->unique(); // Nom de l'entité
+            $table->id(); 
+            $table->string('nom'); // Nom de l'entité
             $table->string('image')->nullable(); // l'image de l'entité
             $table->string('description')->nullable(); // Description de l'entité
             $table->foreignId('hotel_id')->constrained('hotels'); // Hôtel responsable de l'entité

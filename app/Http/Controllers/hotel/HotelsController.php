@@ -21,44 +21,58 @@ class HotelsController extends Controller
             'location' => 'nullable|string|max:255',
             'image' => 'nullable|image|max:2048', // validation de l'image
         ]);
-
-        $data = $request->only(['nom', 'description', 'location']);
-
-        if ($hotel->image && file_exists(storage_path('app/public/' . $hotel->image))) {
-    unlink(storage_path('app/public/' . $hotel->image));
-}
-
-
-        Hotel::create($data);
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('hotels', 'public');
+        }
+    //     $data = $request->only(['nom', 'description', 'location']);
+    //     if ($hotel->image && file_exists(storage_path('app/public/' . $hotel->image))) {
+    // unlink(storage_path('app/public/' . $hotel->image));
+    //     Hotel::create($data);
+    //     return redirect()->route('hotels.index')->with('success', 'Hôtel ajouté avec succès.');
+    //
+    Hotel::create([
+            'nom' => $request->nom,
+            'description' => $request->description,
+            'location' => $request->location,
+            'image' => $imagePath,
+        ]);
 
         return redirect()->route('hotels.index')->with('success', 'Hôtel ajouté avec succès.');
     }
 
     public function update(Request $request, Hotel $hotel)
-    {
-        $request->validate([
-            'nom' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'location' => 'nullable|string|max:255',
-            'image' => 'nullable|image|max:2048',
-        ]);
+{
+    $request->validate([
+        'nom' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'location' => 'nullable|string|max:255',
+        'image' => 'nullable|image|max:2048',
+    ]);
 
-        $data = $request->only(['nom', 'description', 'location']);
+    $imagePath = $hotel->image; // garder l’ancienne image par défaut
 
-        if ($request->hasFile('image')) {
-            // supprimer l'ancienne image si elle existe
-          if ($hotel->image && file_exists(storage_path('app/public/' . $hotel->image))) {
-    unlink(storage_path('app/public/' . $hotel->image));
-}
-
-
-            $data['image'] = $request->file('image')->store('hotels', 'public');
+    if ($request->hasFile('image')) {
+        // supprimer l'ancienne image si elle existe
+        if ($hotel->image && file_exists(storage_path('app/public/' . $hotel->image))) {
+            unlink(storage_path('app/public/' . $hotel->image));
         }
 
-        $hotel->update($data);
-
-        return redirect()->route('hotels.index')->with('success', 'Hôtel modifié avec succès.');
+        // uploader la nouvelle
+        $imagePath = $request->file('image')->store('hotels', 'public');
     }
+
+    // mise à jour comme dans store
+    $hotel->update([
+        'nom' => $request->nom,
+        'description' => $request->description,
+        'location' => $request->location,
+        'image' => $imagePath,
+    ]);
+
+    return redirect()->route('hotels.index')->with('success', 'Hôtel modifié avec succès.');
+}
+
 
     public function destroy(Hotel $hotel)
     {

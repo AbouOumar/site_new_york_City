@@ -257,3 +257,4 @@ document.getElementById('hotelSelect').addEventListener('change', function() {
 });
 </script>
 @endsection
+ 

@@ -12,8 +12,15 @@
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
             <h1 class="text-xl font-bold">Gestion des Hôtels</h1>
             <nav class="space-x-4">
-                <a href="{{ route('hotels.index') }}" class="text-gray-700 hover:text-blue-500">Hôtels</a>
-                <a href="#" class="text-gray-700 hover:text-blue-500">Contact</a>
+                <!-- <a href="{{ route('hotels.index') }}" class="text-gray-700 hover:text-blue-500">Hôtels</a> -->
+                <a href="#" class="text-gray-700 hover:text-blue-500">Comptes</a>
+                <!-- Bouton Hamburger (mobile) -->
+                <button id="menu-button" class="md:hidden text-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+                </button>
             </nav>
         </div>
     </header>

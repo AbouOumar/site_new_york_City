@@ -4,7 +4,7 @@
 <!-- Inclure Alpine.js si ce n'est pas déjà fait dans layouts.app -->
 <script src="//unpkg.com/alpinejs" defer></script>
 
-<div x-data="venteDirecte()" class="p-6 bg-blue-50 rounded-lg shadow">
+<div x-data="venteDirecte()" class="p-6 bg-blue-10 rounded-lg shadow">
     <h1 class="text-2xl font-bold mb-4">Vente directe</h1>
 
     <!-- Sélection entité -->
@@ -17,7 +17,7 @@
     </select>
 
     <!-- Bouton valider -->
-    <button @click="validerVente()" class="mb-4 bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+    <button @click="validerVente()" class="mb-4 bg-gray-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
         📦 Valider la vente
     </button>
 
@@ -117,7 +117,8 @@ function venteDirecte() {
         },
         calculerTotal() {
             this.totalQuantite = this.details.reduce((s, l) => s + Number(l.quantite), 0);
-            this.total = this.details.reduce((s, l) => s + Number(l.net), 0);
+            this.total = this.details.reduce((s, l) => s + Number(l.prix), 0);
+            this.remiseGlobale = this.details.reduce((s, l) => s + Number(l.remise), 0);
             this.netAPayer = this.total - this.remiseGlobale;
         },
         ajouter() {

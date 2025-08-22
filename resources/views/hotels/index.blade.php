@@ -3,6 +3,19 @@
 @section('title', 'Liste des Hôtels')
 
 @section('content')
+
+    @if(session('success'))
+        <div class="mb-4 px-4 py-3 bg-green-100 text-green-800 rounded-lg shadow-md">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="mb-4 px-4 py-3 bg-red-100 text-red-800 rounded-lg shadow-md">
+            {{ session('error') }}
+        </div>
+    @endif
+
 <div class="flex justify-between items-center mb-8">
     <h2 class="text-3xl font-extrabold text-gray-800">Liste des Hôtels</h2>
     <button onclick="openAddModal()"  
@@ -30,8 +43,9 @@
                     <a href="{{ route('hotels.show', $hotel->id) }}" 
                         class="text-blue-600 font-medium hover:underline">Voir détails</a>
                     <div class="flex space-x-3">
-                        <button onclick="openEditModal({{ $hotel }})" 
-                            class="px-3 py-1 rounded bg-yellow-400 hover:bg-yellow-500 text-white text-sm">Modifier</button>
+            <button onclick='openEditModal(@json($hotel))'
+                class="px-3 py-1 rounded bg-yellow-400 hover:bg-yellow-500 text-white text-sm">    Modifier </button>
+
                         <button onclick="openDeleteModal({{ $hotel->id }}, '{{ addslashes($hotel->nom) }}')" 
                             class="px-3 py-1 rounded bg-red-500 hover:bg-red-600 text-white text-sm">Suspendre</button>
                     </div>
@@ -80,35 +94,35 @@
 
 {{-- MODALE EDIT --}}
 <div id="editHotelModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 transition-opacity">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-8 relative transform scale-95 transition-transform duration-300">
-        <h3 class="text-2xl font-bold text-gray-800 mb-6">Modifier l'hôtel</h3>
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl p-10 relative transform scale-95 transition-transform duration-300">
+        <h3 class="text-3xl font-bold text-gray-800 mb-6">Modifier l'hôtel</h3>
 
-        <form id="editHotelForm" method="POST" enctype="multipart/form-data" class="space-y-5">
+        <form id="editHotelForm" method="POST" enctype="multipart/form-data" class="grid grid-cols-2 gap-6">
             @csrf
             @method('PUT')
 
-            <div>
+            <div class="col-span-1">
                 <label class="block text-gray-700 font-medium mb-1">Nom de l'hôtel</label>
                 <input id="edit_nom" type="text" name="nom" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
             </div>
 
-            <div>
+            <div class="col-span-1">
                 <label class="block text-gray-700 font-medium mb-1">Localité</label>
                 <input id="edit_location" type="text" name="location" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
             </div>
 
-            <div>
+            <div class="col-span-2">
                 <label class="block text-gray-700 font-medium mb-1">Description</label>
                 <textarea id="edit_description" name="description" rows="4" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required></textarea>
             </div>
 
-            <div>
+            <div class="col-span-2">
                 <label class="block text-gray-700 font-medium mb-1">Image de l'hôtel</label>
                 <input id="edit_image" type="file" name="image" accept="image/*" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 <img id="current_image" src="" class="w-32 h-32 object-cover mt-2 rounded-lg" style="display:none;">
             </div>
 
-            <div class="flex justify-end space-x-3">
+            <div class="col-span-2 flex justify-end space-x-3 mt-4">
                 <button type="button" onclick="closeEditModal()" class="px-5 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition">Annuler</button>
                 <button type="submit" class="px-5 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg shadow-lg transition">Modifier</button>
             </div>
@@ -117,6 +131,7 @@
         <button onclick="closeEditModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
     </div>
 </div>
+
 
 {{-- MODALE DELETE --}}
 <div id="deleteHotelModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 transition-opacity">
@@ -153,26 +168,30 @@
 
     // --- Edition ---
     function openEditModal(hotel) {
-        const modal = document.getElementById('editHotelModal');
-        const form = document.getElementById('editHotelForm');
+    const modal = document.getElementById('editHotelModal');
+    const form = document.getElementById('editHotelForm');
 
-        document.getElementById('edit_nom').value = hotel.nom;
-        document.getElementById('edit_location').value = hotel.location;
-        document.getElementById('edit_description').value = hotel.description;
+    document.getElementById('edit_nom').value = hotel.nom;
+    document.getElementById('edit_location').value = hotel.location;
+    document.getElementById('edit_description').value = hotel.description;
 
-        form.action = `/hotels/${hotel.id}`;
+    // Dynamique l'action du formulaire
+    form.action = `/hotels/${hotel.id}`;
 
-        const currentImage = document.getElementById('current_image');
-        if(hotel.image){
-            currentImage.src = '/storage/' + hotel.image;
-            currentImage.style.display = 'block';
-        } else {
-            currentImage.style.display = 'none';
-            }
-            
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.querySelector('div').classList.add('scale-100'), 10);
+    const currentImage = document.getElementById('current_image');
+    if (hotel.image) {
+        currentImage.src = '/storage/' + hotel.image;
+        currentImage.style.display = 'block';
+    } else {
+        currentImage.src = '/images/default-hotel.jpg';
+        currentImage.style.display = 'block';
     }
+
+    modal.classList.remove('hidden');
+    setTimeout(() => modal.querySelector('div').classList.add('scale-100'), 10);
+}
+
+
     function closeEditModal() {
         const modal = document.getElementById('editHotelModal');
         modal.querySelector('div').classList.remove('scale-100');

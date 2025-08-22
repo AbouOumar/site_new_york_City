@@ -6,9 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class DetailVente extends Model
 {
-    protected $fillable = ['vente_id','produit_id','quantite','prix','remise','net'];
+    protected $fillable = [
+        'vente_id',
+        'produit_id',
+        'quantite',
+        'prix',
+        'remise',
+        'net'
+    ];
 
-     public function vente()
+    public function vente()
     {
         return $this->belongsTo(Vente::class);
     }

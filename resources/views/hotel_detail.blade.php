@@ -25,12 +25,16 @@
 
         <!-- Carte Hôtel -->
         <section class="bg-white rounded-xl shadow-lg p-8 mb-10">
-            <h1 class="text-4xl font-bold text-blue-700 mb-4">{{ $hotel->nom }}</h1>
-            <p class="text-lg text-gray-700 mb-6 leading-relaxed">{{ $hotel->description }}</p>
-            <div class="flex items-center text-gray-500 text-sm">
-                <span class="mr-2">📍</span> {{ $hotel->location }}
-            </div>
-        </section>
+    <div class="h-60 rounded-t-xl" style="background-image: url('{{ $hotel->image ? asset('storage/' . $hotel->image) : asset('storage/hotels/default-hotel.jpg') }}'); background-size: cover; background-position: center;">
+    </div>
+    <div class="p-4">
+        <h1 class="text-4xl font-bold text-blue-700 mb-2">{{ $hotel->nom }}</h1>
+        <p class="text-lg text-gray-700 mb-4 leading-relaxed">{{ $hotel->description }}</p>
+        <div class="flex items-center text-gray-500 text-sm">
+            <span class="mr-2">📍</span> {{ $hotel->location }}
+        </div>
+    </div>
+</section>
 
         <!-- Liste des entités -->
         <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">

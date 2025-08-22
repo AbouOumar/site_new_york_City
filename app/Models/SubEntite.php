@@ -21,5 +21,10 @@ class SubEntite extends Model
     {
         return $this->belongsTo(Entite::class);
     }
+
+     public function ventes()
+    {
+        return $this->hasMany(Vente::class, 'sub_entite_id');
+    }
     //
 }

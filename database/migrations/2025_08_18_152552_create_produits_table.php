@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('nom')->unique(); // Nom du produit
             $table->foreignId('categorie_id')->constrained()->onDelete('cascade');
             $table->decimal('prix', 10, 2);
+            $table->string('image');
             $table->timestamps();
         });
     }
