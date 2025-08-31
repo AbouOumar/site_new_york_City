@@ -10,8 +10,8 @@ Elle inclut un système d’authentification, la gestion des utilisateurs (admin
 
 ### 1. Cloner le projet
 ```bash
-git clone https://github.com/votre-repo/nom-du-projet.git
-cd nom-du-projet
+git clone https://github.com/AbouOumar/site_new_york_City.git
+cd site_new_york_city 
 ```
 ### 2.Installation des dépendances 
 ```bash
