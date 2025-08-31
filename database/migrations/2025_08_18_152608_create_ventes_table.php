@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('ventes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('subEntite_id')->nullable()->constrained()->onDelete('cascade'); 
-            $table->integer('quantite');
+            $table->foreignId('sub_entite_id')->nullable()->constrained()->onDelete('cascade'); 
+            // $table->integer('quantite');
             $table->decimal('total', 10, 2);
             $table->decimal('remise_globale', 10, 2)->default(0);
             $table->decimal('net', 10, 2);

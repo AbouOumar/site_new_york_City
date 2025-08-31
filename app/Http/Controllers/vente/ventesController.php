@@ -1,61 +1,92 @@
 <?php
 
-namespace App\Http\Controllers\vente;
+namespace App\Http\Controllers\Vente;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\SubEntite;
 use App\Models\Categorie;
 use App\Models\Vente;
+use Illuminate\Support\Facades\Log;
 
-class ventesController extends Controller
+class VentesController extends Controller
 {
+    /**
+     * Affiche le formulaire de création de vente
+     */
     public function create()
     {
         $subEntites = SubEntite::all();
         $categories = Categorie::with('produits')->get(); // Produits par catégorie
+
         return view('venteDirect.index', compact('subEntites', 'categories'));
     }
 
+   
+    /**
+     * Enregistre une nouvelle vente dans le système.
+     * 
+     * Étapes :
+     * 1. Valide les données reçues (sécurité).
+     * 2. Crée une entrée principale dans la table `ventes`.
+     * 3. Ajoute les lignes de détail (produits vendus).
+     * 4. Retourne une réponse JSON pour confirmer l'enregistrement.
+     */
     public function store(Request $request)
-    {
-        $data = $request->validate([
-            'subEntite_id' => 'nullable|exists:sub_entites,id', // null si vente directe
-            'situation' => 'required|in:soldé,credit', // attention sans accent
-            'remiseGlobale' => 'nullable|numeric|min:0',
-            'netAPayer' => 'required|numeric|min:0',
-            'detail' => 'required|array|min:1',
-            'detail.*.produit_id' => 'required|exists:produits,id',
-            'detail.*.quantite' => 'required|integer|min:1',
-            'detail.*.prix' => 'required|numeric|min:0',
-            'detail.*.remise' => 'nullable|numeric|min:0',
-            'detail.*.net' => 'required|numeric|min:0',
+{
+    Log::info('Données reçues:', $request->all());
+
+    // Validation adaptée
+    $data = $request->validate([
+        'sub_entite_id'   => 'nullable|exists:sub_entites,id',
+        'status'          => 'required|in:soldé,crédit',
+        'remise_globale'  => 'nullable|numeric|min:0',
+        'net'             => 'required|numeric|min:0',
+        'etat_commande'   => 'nullable|in:en_attente,validee,annulee', // Ajouté
+        'details'         => 'required|array|min:1',
+        'details.*.produit_id' => 'required|exists:produits,id',
+        'details.*.quantite'   => 'required|integer|min:1',
+        'details.*.prix'       => 'required|numeric|min:0',
+        'details.*.remise'     => 'nullable|numeric|min:0',
+        'details.*.net'        => 'required|numeric|min:0',
+    ]);
+
+    // Calcul de la quantité totale à partir des détails
+    $quantiteTotale = collect($data['details'])->sum('quantite');
+    $total = collect($data['details'])->sum(function($item) {
+        return $item['prix'] * $item['quantite'];
+    });
+
+    // Création de la vente principale
+    $vente = Vente::create([
+        'sub_entite_id'   => $data['sub_entite_id'] ?? null,
+        'status'          => $data['status'],
+        'remise_globale'  => $data['remise_globale'] ?? 0,
+        'net'             => $data['net'],
+        'total'           => $total,
+        'quantite'        => $quantiteTotale, // Calculé à partir des détails
+        'etat_commande'   => $data['etat_commande'] ?? 'en_attente',
+    ]);
+
+    // Enregistrement des lignes de détail
+    foreach ($data['details'] as $detail) {
+        $vente->details()->create([
+            'produit_id' => $detail['produit_id'],
+            'quantite'   => $detail['quantite'],
+            'prix'       => $detail['prix'],
+            'remise'     => $detail['remise'] ?? 0,
+            'net'        => $detail['net'],
         ]);
-
-        // Création de la vente
-        $vente = Vente::create([
-            'subEntite_id' => $data['subEntite_id'] ?? null,
-            'status' => $data['situation'],
-            'remise_globale' => $data['remiseGlobale'] ?? 0,
-            'net' => $data['netAPayer'],
-            'etat_commande' => 'en_attente', // toujours brouillon au départ
-        ]);
-
-        // Ajout des détails
-        foreach ($data['detail'] as $detail) {
-            $vente->details()->create([
-                'produit_id' => $detail['produit_id'],
-                'quantite' => $detail['quantite'],
-                'prix' => $detail['prix'],
-                'remise' => $detail['remise'] ?? 0,
-                'net' => $detail['net'],
-            ]);
-        }
-
-        return redirect()->route('ventes.create')->with('success', 'Vente enregistrée avec succès ✅');
     }
 
-    public function index()
+    return response()->json(['message' => 'Vente enregistrée avec succès ✅']);
+}
+
+
+    /**
+     * Liste des ventes disponibles
+     */
+    public function index() 
     {
         $categories = Categorie::with('produits')->get();
         $subEntites = SubEntite::all();
@@ -63,7 +94,9 @@ class ventesController extends Controller
         return view('venteDirect.index', compact('categories', 'subEntites'));
     }
 
-    // Nouvelle méthode pour valider une commande
+    /**
+     * Valider une commande
+     */
     public function valider($id)
     {
         $vente = Vente::findOrFail($id);
@@ -72,7 +105,9 @@ class ventesController extends Controller
         return back()->with('success', 'Commande validée avec succès ✅');
     }
 
-    // Annuler une commande
+    /**
+     * Annuler une commande
+     */
     public function annuler($id)
     {
         $vente = Vente::findOrFail($id);
@@ -81,55 +116,71 @@ class ventesController extends Controller
         return back()->with('error', 'Commande annulée ❌');
     }
 
-public function subEntites($entiteId)
-{
-    $subEntites = SubEntite::where('entite_id', $entiteId)
-        ->withCount(['ventes as ventes_non_payees_count' => function($q) {
-            $q->where('statut', 'non payé');
-        }])
-        ->get();
+    /**
+     * Liste des sous-entités avec ventes non payées
+     */
+    public function subEntites($entiteId)
+    {
+        $subEntites = SubEntite::where('entite_id', $entiteId)
+            ->withCount(['ventes as ventes_non_payees_count' => function($q) {
+                $q->where('status', 'credit'); // ⚡ harmonisé
+            }])
+            ->get();
 
-    // On passe maintenant $entiteId à la vue
-    return view('venteDirect.subentites', compact('subEntites', 'entiteId'));
-}
+        return view('venteDirect.subentites', compact('subEntites', 'entiteId'));
+    }
 
+    /**
+     * Ventes non payées pour une sous-entité
+     */
+    public function nonPayes($subEntiteId)
+    {
+        $ventes = Vente::where('sub_entite_id', $subEntiteId)
+            ->where('status', 'credit')
+            ->get();
 
-public function nonPayes($subEntiteId)
-{
-    $ventes = Vente::where('sub_entite_id', $subEntiteId)
-        ->where('statut', 'non payé')
-        ->get();
+        return view('venteDirect.nonpayes', compact('ventes', 'subEntiteId'));
+    }
 
-    return view('venteDirect.nonpayes', compact('ventes', 'subEntiteId'));
-}
+    /**
+     * Historique des ventes
+     */
+    public function historique($subEntiteId)
+    {
+        $ventes = Vente::where('sub_entite_id', $subEntiteId)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-public function historique($subEntiteId)
-{
-    $ventes = Vente::where('sub_entite_id', $subEntiteId)
-        ->orderBy('created_at', 'desc')
-        ->get();
+        return view('venteDirect.historique', compact('ventes', 'subEntiteId'));
+    }
 
-    return view('venteDirect.historique', compact('ventes', 'subEntiteId'));
-}
+    /**
+     * Formulaire de transfert de ventes
+     */
+    public function transferForm($subEntiteId)
+    {
+        $ventes = Vente::where('sub_entite_id', $subEntiteId)
+            ->where('status', 'credit')
+            ->get();
 
-public function transferForm($subEntiteId)
-{
-    $ventes = Vente::where('sub_entite_id', $subEntiteId)
-        ->where('statut', 'non payé')
-        ->get();
+        $autresSubEntites = SubEntite::where('id', '!=', $subEntiteId)->get();
 
-    $autresSubEntites = SubEntite::where('id', '!=', $subEntiteId)->get();
+        return view('venteDirect.transfer', compact('ventes', 'autresSubEntites', 'subEntiteId'));
+    }
 
-    return view('venteDirect.transfer', compact('ventes', 'autresSubEntites', 'subEntiteId'));
-}
+    /**
+     * Transfert d’une vente vers une autre sous-entité
+     */
+    public function transfer(Request $request, $venteId)
+    {
+        $request->validate([
+            'nouvelle_sub_entite_id' => 'required|exists:sub_entites,id'
+        ]);
 
-public function transfer(Request $request, $venteId)
-{
-    $vente = Vente::findOrFail($venteId);
-    $vente->sub_entite_id = $request->nouvelle_sub_entite_id;
-    $vente->save();
+        $vente = Vente::findOrFail($venteId);
+        $vente->sub_entite_id = $request->nouvelle_sub_entite_id;
+        $vente->save();
 
-    return back()->with('success', 'Vente transférée avec succès');
-}
-
+        return back()->with('success', 'Vente transférée avec succès ✅');
+    }
 }

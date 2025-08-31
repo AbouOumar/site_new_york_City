@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class SubEntite extends Model
 {
+    protected $table ='sub_entites';
     protected $fillable = [
         'entite_id',
          'nom', 

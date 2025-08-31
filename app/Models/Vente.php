@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class Vente extends Model
 {
     protected $fillable = [
-        'subEntite_id',    // nullable si vente directe
+        'sub_entite_id',    // nullable si vente directe
         'remise_globale',
-        'net',             // ton netAPayer
+        'net',
+        'total',             // ton netAPayer
         'status',          // soldé | credit
-        'etat_commande'    // en_attente | validee | annulee
+        'etat_commande'     // en_attente | validee | annulee
     ];
 
     // Relation avec les détails

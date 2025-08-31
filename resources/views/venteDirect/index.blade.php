@@ -117,7 +117,7 @@ function venteDirecte() {
         },
         calculerTotal() {
             this.totalQuantite = this.details.reduce((s, l) => s + Number(l.quantite), 0);
-            this.total = this.details.reduce((s, l) => s + Number(l.prix), 0);
+            this.total = this.details.reduce((s, l) =>s + ((l.quantite * l.prix) ), 0);
             this.remiseGlobale = this.details.reduce((s, l) => s + Number(l.remise), 0);
             this.netAPayer = this.total - this.remiseGlobale;
         },
@@ -128,29 +128,48 @@ function venteDirecte() {
             this.details.splice(index, 1);
             this.calculerTotal();
         },
-        validerVente() {
-            if (!this.subEntiteId) {
-                alert("⚠️ Veuillez choisir une entité !");
-                return;
-            }
-
-            fetch("{{ route('ventes.store') }}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                },
-                body: JSON.stringify({
-                    sub_entite_id: this.subEntiteId,
-                    details: this.details,
-                    remiseGlobale: this.remiseGlobale,
-                    netAPayer: this.netAPayer,
-                    situation: this.situation
-                })
-            }).then(res => res.json())
-              .then(data => alert("✅ Vente enregistrée avec succès !"))
-              .catch(err => console.error(err));
+       validerVente() {
+    if (!this.subEntiteId) {
+        alert("⚠️ Veuillez choisir une entité !");
+        return;
+    }
+    for (let detail of this.details) {
+        if (!detail.produit_id) {
+            alert("⚠️ Veuillez sélectionner un produit pour toutes les lignes !");
+            return;
         }
+    }
+
+    fetch("{{ route('ventes.store') }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": "{{ csrf_token() }}",
+            "Accept":"application/json"
+        },
+        body: JSON.stringify({
+            sub_entite_id: this.subEntiteId,
+            quantite: this.totalQuantite, // AJOUT
+            remise_globale: this.remiseGlobale,
+            net: this.netAPayer,
+            etat_commande: "en_attente", // exemple
+            status: this.situation, // ou soldé / crédit
+            details: this.details
+        })
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("Erreur serveur");
+        return res.json();
+    })
+    .then(data => {
+        alert("✅ Vente enregistrée avec succès !");
+        window.location.reload(); // ou redirection si tu veux
+    })
+    .catch(err => {
+        console.error(err);
+        alert("❌ Erreur lors de l'enregistrement de la vente");
+    });
+}
     }
 }
 </script>
